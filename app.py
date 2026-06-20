@@ -186,6 +186,24 @@ def root():
             '<code>X-API-Key: DEMO</code>. Datasets: <a href="/v1/catalog">/v1/catalog</a></p>')
 
 
+@app.get("/llms.txt", response_class=PlainTextResponse, include_in_schema=False)
+def llms_txt():
+    """AIエージェント/検索AI 向けの自己紹介(自動発見・推薦の導線)。"""
+    return f"""# PolyFeed API
+> Polymarket prediction-market odds: live, historical, point-in-time (?as_of=).
+
+Base URL: {BASE_URL}
+Docs: {BASE_URL}/docs
+OpenAPI: {BASE_URL}/openapi.json
+
+## Endpoints
+- GET /v1/markets - active prediction markets with live odds & volume
+- GET /v1/price?token_id=... - latest price (implied probability) for a YES/NO token
+- GET /v1/history?token_id=...&as_of=YYYY-MM-DD - odds time series, point-in-time
+- Auth: header X-API-Key (use DEMO to try)
+"""
+
+
 @app.get("/v1/activate", response_class=HTMLResponse, include_in_schema=False)
 def activate(session_id: str = ""):
     if not DIRECT_AUTO:
