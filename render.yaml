@@ -1,0 +1,20 @@
+# Render 用デプロイ設定(この flip_polymarketapi フォルダを web サービスとして公開)
+services:
+  - type: web
+    name: polymarket-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: PUBLIC_BASE_URL
+        value: https://polymarket-api.onrender.com
+      # 出品/直販を有効化する時に設定:
+      # - key: RAPIDAPI_PROXY_SECRET
+      #   value: <RapidAPIのProxy Secret>
+      # - key: STRIPE_SECRET_KEY
+      #   value: <Stripe制限付きキー rk_live_...>
+      # - key: KEY_SIGNING_SECRET
+      #   value: <ランダム32文字以上>

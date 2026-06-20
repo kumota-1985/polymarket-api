@@ -1,0 +1,55 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PolyFeed — Prediction Market Data (Polymarket)",
+    "description": "Live, historical, and point-in-time prediction-market odds from Polymarket. List active markets with live odds, get the latest price (implied probability) for any YES/NO token, and pull odds time series with ?as_of=YYYY-MM-DD for true point-in-time (no look-ahead). Clean schema, JSON or CSV.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://polymarket-api.onrender.com" }
+  ],
+  "paths": {
+    "/v1/catalog": {
+      "get": { "summary": "List datasets", "description": "Available datasets and endpoints.",
+        "responses": { "200": { "description": "Catalog" } } }
+    },
+    "/v1/markets": {
+      "get": {
+        "summary": "Active prediction markets (live odds)",
+        "description": "Active (or closed=true for resolved) prediction markets with current odds, volume, end date, and YES/NO token ids.",
+        "parameters": [
+          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 50 }, "description": "Max markets (1-100)" },
+          { "name": "closed", "in": "query", "required": false, "schema": { "type": "boolean", "default": false }, "description": "true = resolved markets" },
+          { "name": "min_volume", "in": "query", "required": false, "schema": { "type": "number" }, "description": "Min USD volume filter" },
+          { "name": "format", "in": "query", "required": false, "schema": { "type": "string", "enum": ["json", "csv"], "default": "json" } }
+        ],
+        "responses": { "200": { "description": "Markets with live odds" } }
+      }
+    },
+    "/v1/price": {
+      "get": {
+        "summary": "Latest price (implied probability) for a token",
+        "description": "Latest price for a YES/NO token (clobTokenId from /v1/markets). Price = the market-implied probability.",
+        "parameters": [
+          { "name": "token_id", "in": "query", "required": true, "schema": { "type": "string" }, "description": "clobTokenId from /v1/markets" },
+          { "name": "format", "in": "query", "required": false, "schema": { "type": "string", "enum": ["json", "csv"], "default": "json" } }
+        ],
+        "responses": { "200": { "description": "Latest price" } }
+      }
+    },
+    "/v1/history": {
+      "get": {
+        "summary": "Odds time series (point-in-time)",
+        "description": "Historical odds for a token. Add ?as_of=YYYY-MM-DD to get only observations up to that date (point-in-time, no look-ahead).",
+        "parameters": [
+          { "name": "token_id", "in": "query", "required": true, "schema": { "type": "string" }, "description": "clobTokenId from /v1/markets" },
+          { "name": "as_of", "in": "query", "required": false, "schema": { "type": "string", "example": "2024-06-01" }, "description": "Point-in-time cutoff date" },
+          { "name": "interval", "in": "query", "required": false, "schema": { "type": "string", "enum": ["1d", "1w", "1m", "max"], "default": "max" } },
+          { "name": "fidelity", "in": "query", "required": false, "schema": { "type": "integer", "default": 720 }, "description": "Resolution in minutes" },
+          { "name": "format", "in": "query", "required": false, "schema": { "type": "string", "enum": ["json", "csv"], "default": "json" } }
+        ],
+        "responses": { "200": { "description": "Odds time series" } }
+      }
+    }
+  }
+}
