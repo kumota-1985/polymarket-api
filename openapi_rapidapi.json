@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "servers": [
-    { "url": "https://polymarket-api.onrender.com" }
+    { "url": "https://polymarket-api-q2g1.onrender.com" }
   ],
   "paths": {
     "/v1/catalog": {

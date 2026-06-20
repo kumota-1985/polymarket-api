@@ -10,7 +10,7 @@ services:
       - key: PYTHON_VERSION
         value: "3.11.9"
       - key: PUBLIC_BASE_URL
-        value: https://polymarket-api.onrender.com
+        value: https://polymarket-api-q2g1.onrender.com
       # 出品/直販を有効化する時に設定:
       # - key: RAPIDAPI_PROXY_SECRET
       #   value: <RapidAPIのProxy Secret>
