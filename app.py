@@ -22,6 +22,7 @@ import time
 import base64
 import hashlib
 import hmac
+import threading
 import urllib.request
 import urllib.parse
 from datetime import datetime, timezone
@@ -44,6 +45,20 @@ DIRECT_AUTO = bool(STRIPE_SECRET_KEY and KEY_SIGNING_SECRET)
 
 _cache = {}        # url -> (data, expiry)
 _sub_cache = {}    # sub_id -> (active, expiry)
+_CACHE_MAX = int(os.environ.get("POLYFEED_CACHE_MAX", "512"))   # url キャッシュの最大件数(メモリ肥大化防止)
+_cache_lock = threading.Lock()   # FastAPIは同期defをスレッドプールで並列実行 → 退避処理を直列化
+
+
+def _cache_put(url, data, expiry):
+    """url->(data,expiry) を保存。上限到達時はまず期限切れを掃除し、それでも超過なら最古から削除。"""
+    with _cache_lock:
+        if len(_cache) >= _CACHE_MAX:
+            now = time.time()
+            for k in [k for k, v in _cache.items() if v[1] <= now]:
+                _cache.pop(k, None)
+            while len(_cache) >= _CACHE_MAX:
+                _cache.pop(next(iter(_cache)), None)   # dict は挿入順 → 最古を退避
+        _cache[url] = (data, expiry)
 
 
 # --------------------------------------------------------------------------- #
@@ -127,7 +142,7 @@ def _get_json(url: str, ttl: int = 60):
         try:
             with urllib.request.urlopen(req, timeout=25) as r:
                 data = json.loads(r.read().decode())
-            _cache[url] = (data, now + ttl)
+            _cache_put(url, data, now + ttl)
             return data
         except Exception as e:
             last = e
